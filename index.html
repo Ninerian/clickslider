@@ -20,7 +20,7 @@
             <li class="grid_3 omega"><button class="slider__qual ">Qualität</button></li>
           </ul>
 
-          <span class="slider__arrow"></span>
+          <span class="slider-arrow"></span>
         </div>
         <div class="slider-slides grid_22 prefix_1">
 
@@ -56,10 +56,16 @@
     </div>
 
   <script src="bower_components/jquery/jquery.js"></script>
+  <script src="bower_components/jquery-easing/jquery.easing.js"></script>
     <script src="scripts/clickSlider.js"></script>
 
     <script>
-      $('.example').clickSlider();
+      $('.slider').ClickSlider({
+        duration: 1000,
+        easing: 'easeInOutQuad',
+        startSlide: 1
+
+      });
     </script>
   </body>
 </html>

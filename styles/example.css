@@ -88,14 +88,14 @@
 }
 
 
-.slider__arrow {
+.slider-arrow {
   width: 100%;
   height: 85px;
   background: url("../images/slider__arrow.png") no-repeat 0px bottom transparent;
   background: url("../images/slider__arrow.svg") no-repeat 0px bottom transparent;
 }
 
-.slider__arrow:hover,
+.slider-arrow:hover,
 .slider-nav:hover,
 .slider__headline:hover {
   opacity: 1;
