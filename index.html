@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Slider</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="styles/grid.css">
+    <link rel="stylesheet" href="styles/example.css">
+  </head>
+  <body>
+    <div class="slider innerWrap">
+      <div class="inner container_24">
+        <div class="slider-nav grid_12">
+          <ul>
+            <li class="grid_3 alpha"><button class="slider__gba">Ganzheitlicher Behandlungsansatz</button></li>
+            <li class="grid_3"><button class="slider__komm ">Kommunikation</button></li>
+            <li class="grid_3"><button class="slider__ptz ">Patientenzufriedenheit</button></li>
+            <li class="grid_3 omega"><button class="slider__qual ">Qualität</button></li>
+          </ul>
+
+          <span class="slider__arrow"></span>
+        </div>
+        <div class="slider-slides grid_22 prefix_1">
+
+          <div id="slider-slide__gba" class="">
+            <h2>Ganzheitlicher Behandlungsansatz</h2>
+
+            <p>Selten ist es so, dass Symptom gleich Ursache ist. H&auml;ufig ist die Ursache eine ganz Andere. Daher ist es wichtig den Mensch als eine Einheit zu sehen.</p>
+
+            <p>Eine genaue Befundaufnahme und eine fundierte Analyse geh&ouml;ren deshalb an den Anfang einer Behandlung. Es bedarf eines umfassendes anatomischen und physiologisches Wissens, um die Ursachen der Symptome einzugrenzen, und den richtigen Behandlungsansatz festzulegen.</p>
+          </div>
+
+          <div id="slider-slide__komm" class="">
+            <h2>Kommunikation</h2>
+
+            <p>Gute Kommunikation ist das A und O einer vertrauensvollen Beziehung zwischen Patient und Behandler.</p>
+
+            <p>Je besser ich über Sie und ihre Beschwerden informiert bin, umso gezielter kann ich sie behandeln.</p>
+          </div>
+
+          <div id="slider-slide__ptz" class="">
+            <h2>Patientenzufriedenheit</h2>
+
+            <p>Die Zufriedenheit meiner Patienten ist Grundvoraussetzung für den Behandlungserfolg. Deshalb möchte ich Sie in einer ruhigen und angenehmen Atmosphäre behandeln. Sie sollen sich entspannen, wohl fühlen und ankommen.</p>
+          </div>
+
+          <div id="slider-slide__qual" class="">
+            <h2>Qualität</h2>
+
+            <p>Stetige Fort-und Weiterbildung sichern einen hohen Qualitätsstandard in der Therapie und dienen ihrer fortwährenden Optimierung. </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <script src="bower_components/jquery/jquery.js"></script>
+    <script src="scripts/clickSlider.js"></script>
+
+    <script>
+      $('.example').clickSlider();
+    </script>
+  </body>
+</html>

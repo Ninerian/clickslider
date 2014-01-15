@@ -1,0 +1,103 @@
+/**
+* Slider
+*/
+
+.slider {
+  overflow: hidden;
+}
+
+.slider-nav ul {
+  padding: 0;
+  margin: 0;
+}
+
+[class^=slider__] {
+  display: block;
+  height : 100px;
+  width: 100px;
+  border-radius: 50%;
+  border: none;
+  background-color: green;
+  /*background: url("../images/slider__philosophie.png") no-repeat;*/
+  /*background: url("../images/slider__philosophie.svg") no-repeat;*/
+
+  overflow: hidden;
+  text-indent: -1000px;
+  margin: 0 auto;
+}
+
+.slider-nav {
+  margin: 0 0 55px 247px;
+  height: auto;
+  background: none;
+}
+
+#philosophie .slider-nav {
+  margin-top: 245px;
+}
+
+.slider__headline {
+  background: none;
+  display: inline;
+  text-align: center;
+  text-indent: 0;
+}
+
+.slider__komm{
+  background-position: 0 -100px;
+}
+
+.slider__ptz{
+  background-position: 0 -200px;
+}
+
+.slider__qual{
+  background-position: 0 -300px;
+}
+
+.slider__gba{
+  background-position: 0 0;
+}
+
+[class^=slider__]:hover {
+  opacity: 0.6;
+  filter: alpha(opacity=60);
+}
+
+.slider-slides {
+  overflow: hidden;
+  height: 500px;
+}
+
+[id^=slider-slide__] {
+  width: 870px;
+  left: 42px;
+}
+
+#slider__slide__gba {
+
+}
+#slider__slide__komm {
+  left: 870px;
+}
+#slider__slide__ptz {
+  left: 1740px;
+}
+#slider__slide__qual {
+  left: 2610px;
+}
+
+
+.slider__arrow {
+  width: 100%;
+  height: 85px;
+  background: url("../images/slider__arrow.png") no-repeat 0px bottom transparent;
+  background: url("../images/slider__arrow.svg") no-repeat 0px bottom transparent;
+}
+
+.slider__arrow:hover,
+.slider-nav:hover,
+.slider__headline:hover {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
