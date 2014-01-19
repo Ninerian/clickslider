@@ -21,9 +21,8 @@
       SLIDER_SLIDE_CLASS: 'slide__',
 
       DEFAULT_EASING: 'linear',
-      DEFAULT_DURATION: 1000,
+      DEFAULT_DURATION: 1000
 
-      slider_ID: ''
     };
 
   // The actual plugin constructor
@@ -43,33 +42,8 @@
 
     this.activeSlide = null;
 
-    this._defaults.slider_ID = _makeID();
-
     var _that = this;
-//
-//    this.slidesData;
-//    this.containerInnerWidth;
-//    this.containerOuterWidth;
-//    this.containerHeight;
-//
-//
-//    this.slidesElements;
-//    this.controlElements;
 
-    /**
-     * Generates random string
-     * @return {[string]} random string
-     */
-
-    function _makeID() {
-      var text = "";
-      var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-      for (var i = 0; i < 5; i++)
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-      return text;
-    }
 
     this.init();
 
@@ -110,6 +84,8 @@
   }
 
   ClickSlider.prototype = {
+   
+
 
     init: function () {
       // Place initialization logic here
@@ -120,14 +96,12 @@
       // call them like so: this.yourOtherFunction().
       var _sliderElement = this.$element;
       var _navigationElement = this.getElements(_sliderElement, '.slider-nav');
-      var _arrowElement = this.getElements(_sliderElement, '.slider-arrow');
       var _slidesContainer = this.getElements(_sliderElement, '.slider-slides');
-
       // setup auto slideshow
       this.delay = this.options.autoPlay || 0;
-    
 
 
+      this.arrowElement = this.getElements(_sliderElement, '.slider-arrow');
       this.controlElements = this.getElements(_navigationElement, 'button');
       this.slidesElements = _slidesContainer.children();
 
@@ -140,10 +114,6 @@
       this.containerPaddingLeft = _slidesContainer.css('padding-left');
 
       this.containerHeight = this.getMaxHeight();
-
-      console.log('containerInnerWidth', this.containerInnerWidth);
-      console.log('containerOuterWidth', this.containerOuterWidth);
-
 
 
       _slidesContainer.height(this.containerHeight);
@@ -160,6 +130,7 @@
 
 
     },
+
 
     /**
      * Set all slides to the source Position
@@ -190,11 +161,18 @@
         });
       }
 
+      this.moveArrow(_slideNumber, 0);
       this.toggleActiveState(_slideNumber);
 
 
     },
 
+    getTargetPosition: function (slide) {
+      var _elementWidth = this.slidesData[slide].width;
+
+       return (this.containerInnerWidth - _elementWidth) / 2;
+
+    },
 
     /**
      * switches slides
@@ -218,16 +196,11 @@
 
       to = this.circle(to);
 
-      this.moveSlide(_from, this.containerOuterWidth * _direction, this.duration,
-        this.moveSlide(to, this.getTargetPosition(to), this.duration, this.toggleActiveState(to))
-        );
+      this.moveSlide(_from, this.containerOuterWidth * _direction, this.duration) 
+      this.moveSlide(to, this.getTargetPosition(to), this.duration, this.toggleActiveState(to));
+      this.moveArrow(to);
+        
 
-    },
-
-    getTargetPosition: function (slide) {
-      var _elementWidth = this.slidesData[slide].width;
-
-       return (this.containerInnerWidth - _elementWidth) / 2;
 
     },
 
@@ -242,6 +215,7 @@
 
     moveSlide: function (slide, targetPosition, speed, callback) {
       var _slideElement = $(this.slidesElements[slide]);
+      var _that = this;
 
       if (speed === 0) {
         _slideElement.css({
@@ -257,9 +231,13 @@
             }, {
               duration: this.duration,
               easing: this.easing,
-              queue: true
-            },
-            callback);
+              complete: function() {
+                if (typeof callback === 'function') {
+                  callback(_that);
+                }
+              }
+            }
+            );
     },
 
     /**
@@ -310,23 +288,38 @@
     },
 
 
-
-    /**
-     * [autoPlay description]
-     * @return {[type]}
-     */
-
-    autoPlay: function () {
-      // body...
-    },
-
     /**
      * [moveArrow description]
      * @param  {[type]} argument
      * @return {[type]}
      */
-    moveArrow: function (argument) {
-      // body...
+    moveArrow: function ( dest, speed ) {
+      if (!this.arrowElement) return;
+
+      var _arrowElement =   $(this.arrowElement),
+          _targetPosition = $(this.controlElements[dest]).parent().position().left,
+          _controlWidth = $(this.controlElements[dest]).width(),
+          _arrowWidth = $(this.arrowElement).width(),
+          _centerPosition;
+
+        _centerPosition = _controlWidth > _arrowWidth ?
+          ( _controlWidth - _arrowWidth ) / 2 :  ( _arrowWidth - _controlWidth ) / 2;
+
+      if (speed === 0) {
+        _arrowElement.css({
+          marginLeft: _targetPosition + _centerPosition
+        });
+
+
+        return;
+      }
+
+      _arrowElement.animate({
+        marginLeft: _targetPosition + _centerPosition
+      },{
+        duration: speed || this.duration,
+        easing: this.easing
+      });
     },
 
     getElements: function (parent, searchedElement) {
