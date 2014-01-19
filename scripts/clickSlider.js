@@ -47,7 +47,7 @@
 
     this.init();
 
-    if (this.delay !== 0) begin();
+    if (this.delay !== 0) this.begin();
 
     /*
      API
@@ -105,8 +105,6 @@
       this.controlElements = this.getElements(_navigationElement, 'button');
       this.slidesElements = _slidesContainer.children();
 
-      this.slidePosition = new Array( this.slidesElements.length );
-
       this.slidesData = this.collectSlideData(this.slidesElements);
 
       this.containerInnerWidth = _slidesContainer.width();
@@ -152,7 +150,7 @@
         } else if (i !== _slideNumber) {
           _targetPosition = - this.containerOuterWidth;
         } else {
-          _targetPosition = ((this.containerInnerWidth - _elementWidth) / 2) +  this.containerPaddingLeft ;
+          _targetPosition = ((this.containerInnerWidth - _elementWidth) / 2) + this.containerPaddingLeft;
         }
 
         $(this.slidesElements[i]).css({
@@ -170,7 +168,7 @@
     getTargetPosition: function (slide) {
       var _elementWidth = this.slidesData[slide].width;
 
-       return (this.containerInnerWidth - _elementWidth) / 2;
+       return (this.containerInnerWidth - _elementWidth) / 2 + this.containerPaddingLeft ;
 
     },
 
@@ -192,7 +190,7 @@
 
       _diff = Math.abs(_from - to) - 1;
 
-      while (_diff--) this.moveSlide ( this.circle((_from > to ? to: _from ) - _diff - 1), this.containerOuterWidth * _direction, 0 );
+      while (_diff--) this.moveSlide ( this.circle((to > _from ? to: _from ) - _diff - 1), this.containerOuterWidth * _direction, 0 );
 
       to = this.circle(to);
 
@@ -232,6 +230,7 @@
               duration: this.duration,
               easing: this.easing,
               complete: function() {
+                if (_that.delay) _that.begin();
                 if (typeof callback === 'function') {
                   callback(_that);
                 }
@@ -267,8 +266,9 @@
     },
 
     begin: function() {
+      var that = this;
 
-      this.interval = setTimeout(this.next, delay);
+      this.interval = setTimeout(that.next(), this.delay);
 
     },
 
