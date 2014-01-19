@@ -15,7 +15,15 @@
   // Create the defaults once
   var pluginName = 'ClickSlider',
     defaults = {
-      propertyName: 'value'
+      SLIDER_CLASS: 'slider',
+      SLIDER_CONTROLL_CLASS: '-control__',
+      SLIDER_SLIDES_CONTAINER: 'slider-slides',
+      SLIDER_SLIDE_CLASS: 'slide__',
+
+      DEFAULT_EASING: 'linear',
+      DEFAULT_DURATION: 1000,
+
+      slider_ID: ''
     };
 
   // The actual plugin constructor
@@ -29,23 +37,15 @@
     // future instances of the plugin
     this.options = $.extend({}, defaults, options);
     this._defaults = defaults;
-    this._name = pluginName;
 
-    this.SLIDER_CLASS = 'slider';
-    this.SLIDER_CONTROLL_CLASS = '-control__';
-    this.SLIDER_SLIDES_CONTAINER = 'slider-slides';
-    this.SLIDER_SLIDE_CLASS = '-slide__';
+    this.easing = this.options.easing || this._defaults.DEFAULT_EASING;
+    this.duration = this.options.duration || this._defaults.DEFAULT_DURATION;
 
-    this.SLIDER_ID = _makeID();
+    this.activeSlide = null;
 
-    this.DEFAULT_EASING = 'linear';
-    this.DEFAULT_DURATION = 1000;//ms
+    this._defaults.slider_ID = _makeID();
 
-    this.easing = this.options.easing || this.DEFAULT_EASING;
-    this.duration = this.options.duration || this.DEFAULT_DURATION;
-
-    this.activeSlide = this.options.startSlide || 0;
-
+    var _that = this;
 //
 //    this.slidesData;
 //    this.containerInnerWidth;
@@ -72,11 +72,44 @@
     }
 
     this.init();
+
+    if (this.delay !== 0) begin();
+
+    /*
+     API
+     */
+
+    return {
+      play: function() {
+        _that.begin();
+      },
+      pause: function() {
+        _that.stop();
+      },
+      next: function() {
+        _that.stop();
+
+        _that.next();
+      },
+      prev: function() {
+        _that.stop();
+
+        _that.prev();
+      },
+      slideTo: function(to) {
+        _that.stop();
+        _that.switchSlide(to);
+      },
+      getPos: function() {
+        return _that.activeSlide;
+      },
+      getSlideNum: function() {
+        return _that.slidesElements.length;
+      }
+    }
   }
 
   ClickSlider.prototype = {
-
-    variables: this,
 
     init: function () {
       // Place initialization logic here
@@ -90,32 +123,42 @@
       var _arrowElement = this.getElements(_sliderElement, '.slider-arrow');
       var _slidesContainer = this.getElements(_sliderElement, '.slider-slides');
 
-      this.controlElements = this.getElements(_navigationElement, 'button');
-      this.slidesElements = _slidesContainer.children('div[id^="slider-slide"]');
+      // setup auto slideshow
+      this.delay = this.options.autoPlay || 0;
+    
 
+
+      this.controlElements = this.getElements(_navigationElement, 'button');
+      this.slidesElements = _slidesContainer.children();
+
+      this.slidePosition = new Array( this.slidesElements.length );
 
       this.slidesData = this.collectSlideData(this.slidesElements);
 
-
       this.containerInnerWidth = _slidesContainer.width();
       this.containerOuterWidth = _slidesContainer.outerWidth();
+      this.containerPaddingLeft = _slidesContainer.css('padding-left');
+
       this.containerHeight = this.getMaxHeight();
 
       console.log('containerInnerWidth', this.containerInnerWidth);
       console.log('containerOuterWidth', this.containerOuterWidth);
 
 
+
       _slidesContainer.height(this.containerHeight);
 
 
-      this.setCountClass(this.controlElements, this.SLIDER_CONTROLL_CLASS);
-      this.setCountClass(this.slidesElements, this.SLIDER_SLIDE_CLASS);
+      this.setCountClass(this.controlElements, defaults.SLIDER_CONTROLL_CLASS);
+      this.setCountClass(this.slidesElements, defaults.SLIDER_SLIDE_CLASS);
 
 
       this.initControls(this.controlElements);
 
       this.startPosition(this.options.startSlide);
       //switchSlide( options.startSlide );
+
+
     },
 
     /**
@@ -127,7 +170,6 @@
 
     startPosition: function (startSlide) {
       var _slideNumber = startSlide || 0;
-      var _slideClass = '.' + this.SLIDER_CLASS + this.SLIDER_SLIDE_CLASS;
       var _targetPosition;
       var _elementWidth;
 
@@ -137,18 +179,19 @@
         if (i !== _slideNumber && i > 0) {
           _targetPosition = this.containerOuterWidth;
         } else if (i !== _slideNumber) {
-          _targetPosition = 0 - _elementWidth;
+          _targetPosition = - this.containerOuterWidth;
         } else {
-          _targetPosition = (this.containerOuterWidth - _elementWidth) / 2;
+          _targetPosition = ((this.containerInnerWidth - _elementWidth) / 2) +  this.containerPaddingLeft ;
         }
 
-        $(_slideClass + i).css({
+        $(this.slidesElements[i]).css({
           'position': 'absolute',
           'left': _targetPosition
         });
       }
 
       this.toggleActiveState(_slideNumber);
+
 
     },
 
@@ -157,33 +200,35 @@
      * switches slides
      * @return {[type]}
      */
-    switchSlide: function (slide, data) {
-      var _slideNumber = slide || 0;
-      var _slideClass = this.SLIDER_CLASS + this.SLIDER_SLIDE_CLASS;
+    switchSlide: function ( to ) {
+
+      if ( this.activeSlide === to ) return;
+
+
+      var _from = this.activeSlide;
       var _direction;
+      var _diff;
 
-      if (this.activeSlide > _slideNumber) {
-        _direction = 'right';
-      } else if (this.activeSlide < _slideNumber) {
-        _direction = 'left';
-      } else {
-        return;
-      }
 
-      this.moveSlide(_slideClass + _slideNumber, this.getTargetPosition(_slideNumber, _direction));
-      this.moveSlide(_slideClass + this.activeSlide, this.getTargetPosition(this.activeSlide, _direction), this.toggleActiveState(_slideNumber));
+      _direction = Math.abs(_from - to) / (_from - to); // 1: backward, -1: forward
+
+      _diff = Math.abs(_from - to) - 1;
+
+      while (_diff--) this.moveSlide ( this.circle((_from > to ? to: _from ) - _diff - 1), this.containerOuterWidth * _direction, 0 );
+
+      to = this.circle(to);
+
+      this.moveSlide(_from, this.containerOuterWidth * _direction, this.duration,
+        this.moveSlide(to, this.getTargetPosition(to), this.duration, this.toggleActiveState(to))
+        );
+
     },
 
-    getTargetPosition: function (slide, direction) {
+    getTargetPosition: function (slide) {
       var _elementWidth = this.slidesData[slide].width;
 
-      if (slide !== this.activeSlide) {
-        return (this.containerInnerWidth - _elementWidth) / 2;
-      } else if (direction === 'left') {
-        return 0 - _elementWidth;
-      } else {
-        return this.containerOuterWidth;
-      }
+       return (this.containerInnerWidth - _elementWidth) / 2;
+
     },
 
 
@@ -195,80 +240,76 @@
      * @returns {*}
      */
 
-    moveSlide: function (slide, targetPosition, callback) {
+    moveSlide: function (slide, targetPosition, speed, callback) {
+      var _slideElement = $(this.slidesElements[slide]);
 
-     return $('.' + slide).animate({
+      if (speed === 0) {
+        _slideElement.css({
+          left: targetPosition
+        });
+
+
+        return;
+      }
+
+     return _slideElement.animate({
               left: targetPosition
             }, {
-              duration: duration,
-              easing: easing,
+              duration: this.duration,
+              easing: this.easing,
               queue: true
             },
             callback);
     },
 
     /**
-     * [getDirection description]
-     * @param  {[type]} slide
-     * @return {[type]}
-     */
-
-    getDirection: function (slide) {
-      var direction,
-        _slidePosition = $(slide).position().left;
-
-      if (_slidePosition < 0) {
-        direction = 'left';
-      } else if (_slidePosition > this.containerOuterWidth) {
-        direction = 'right';
-      } else {
-        direction = 'both';
-      }
-
-      return direction;
-    },
-
-    /**
      * [setActiveSlide description]
      */
     toggleActiveState: function (slideNumber) {
-      var _slideNumber = slideNumber || 0;
-      var _slideClassName = '.' + this.SLIDER_CLASS + this.SLIDER_SLIDE_CLASS + _slideNumber;
-      var _controllerClassName = '.' + this.SLIDER_CLASS + this.SLIDER_CONTROLL_CLASS + _slideNumber;
-
       this.slidesElements.removeClass('active');
       this.controlElements.removeClass('active');
 
-      $(_slideClassName).addClass('active');
-      $(_controllerClassName).addClass('active');
-
-      this.activeSlide = _slideNumber;
+      $(this.slidesElements[slideNumber]).addClass('active');
+      $(this.controlElements[slideNumber]).addClass('active');
+      this.activeSlide = slideNumber;
     },
 
     /**
-     * [isActive description]
-     * @param  {[type]}  el
-     * @return {Boolean}
+     *
+     * @param index
+     * @returns {number}
      */
-    isActive: function (el) {
-      return $(el).hasClass('active');
-    },
 
-    /**
-     * [isFirst description]
-     * @return {Boolean}
-     */
-    isFirst: function (el) {
+    circle: function(index) {
+
+    // a simple positive modulo using this.slidesElements.length
+     return (this.slidesElements.length +
+                (index % this.slidesElements.length)) % this.slidesElements.length;
 
     },
 
-    /**
-     * [isLast description]
-     * @return {Boolean}
-     */
-    isLast: function () {
+    begin: function() {
+
+      this.interval = setTimeout(this.next, delay);
 
     },
+
+    next: function() {
+      if (this.activeSlide < this.slidesElements.length - 1) this.switchSlide(this.activeSlide + 1);
+    },
+
+    prev: function() {
+      if (this.activeSlide > 0) this.switchSlide(this.activeSlide - 1);
+    },
+
+    stop: function() {
+
+      this.delay = 0;
+      clearTimeout(this.interval);
+
+    },
+
+
 
     /**
      * [autoPlay description]
@@ -288,10 +329,6 @@
       // body...
     },
 
-    getData: function() {
-      return this;
-    },
-
     getElements: function (parent, searchedElement) {
       var element = $(parent).find(searchedElement);
 
@@ -302,7 +339,7 @@
 
     setCountClass: function (element, className) {
       for (var i = 0; i < element.length; i++) {
-        $(element[i]).addClass(this.SLIDER_CLASS + className + i);
+        $(element[i]).addClass(defaults.SLIDER_CLASS + className + i);
       }
     },
 
@@ -328,8 +365,7 @@
 
       return {
         width: _el.width(),
-        height: _el.height(),
-        direction: this.getDirection(_el)
+        height: _el.height()
       };
     },
 
@@ -342,11 +378,10 @@
     addClickEvent: function (element) {
       var _className = $(element).attr('class');
       var _position = parseInt(_className.substr(_className.lastIndexOf('__') + 2, _className.length - 1), 10);
-      var _that = this;
 
-      $(element).on('click', _that, function ( event ) {
-        ClickSlider.prototype.switchSlide(_position, event.data);
-      });
+      $(element).on('click', $.proxy(function ( event ) {
+        this.switchSlide(_position);
+      }, this));
     },
 
     getMaxHeight: function () {
@@ -358,6 +393,8 @@
 
       return Math.max.apply(null, maxHeight);
     }
+
+
   };
 
   // A really lightweight plugin wrapper around the constructor,
