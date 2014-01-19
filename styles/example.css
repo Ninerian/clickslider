@@ -101,3 +101,10 @@
   opacity: 1;
   filter: alpha(opacity=100);
 }
+
+body {
+  font-size: 24px;
+  font-family: Helvetica Neue, Helvetica, Arial;
+
+  text-align: center;
+}
