@@ -80,12 +80,10 @@
       getSlideNum: function() {
         return _that.slidesElements.length;
       }
-    }
+    };
   }
 
   ClickSlider.prototype = {
-   
-
 
     init: function () {
       // Place initialization logic here
@@ -104,6 +102,17 @@
       this.arrowElement = this.getElements(_sliderElement, '.slider-arrow');
       this.controlElements = this.getElements(_navigationElement, 'button');
       this.slidesElements = _slidesContainer.children();
+
+      // set continuous to false if only one slide
+      if (this.slidesElements.length < 2) this.options.continuous = false;
+
+      //special case if two slides
+      if (this.options.continuous && this.slidesElements.length < 3) {
+        _slidesContainer.append(this.slidesElements[0].cloneNode(true));
+        _slidesContainer.append(_slidesContainer.children()[1].cloneNode(true));
+        this.slidesElements = _slidesContainer.children();
+      }
+
 
       this.slidesData = this.collectSlideData(this.slidesElements);
 
@@ -177,7 +186,7 @@
      * switches slides
      * @return {[type]}
      */
-    switchSlide: function ( to ) {
+    switchSlide: function ( to, speed ) {
 
       if ( this.activeSlide === to ) return;
 
@@ -185,22 +194,52 @@
       var _from = this.activeSlide;
       var _direction;
       var _diff;
+      var _originalDirection;
+      var _speed = speed || this.duration;
 
-
+ console.log("to before", to);
       _direction = Math.abs(_from - to) / (_from - to); // 1: backward, -1: forward
 
+       // get the actual position of the slide
+      if (this.options.continuous) {
+        _originalDirection = _direction;
+        _direction = - $(this.slidesElements[this.circle(to)]).position().left / this.containerOuterWidth;
+
+
+
+        // if going forward but to < index, use to = slides.length + to
+        // if going backward but to > index, use to = -slides.length + to
+        if (_direction !== _originalDirection){
+         // this.moveSlide ( to + _direction, this.containerOuterWidth * _direction, 0 );
+          to =  -_direction * this.slidesElements.length + to;
+          console.log("_direction !== _originalDirection");
+          //this.moveSlide ( to, this.containerOuterWidth * _direction, 0 );
+        }
+
+      }
+   console.log("to after", to);
       _diff = Math.abs(_from - to) - 1;
 
-      while (_diff--) this.moveSlide ( this.circle((to > _from ? to: _from ) - _diff - 1), this.containerOuterWidth * _direction, 0 );
+      while (_diff--) {
+         console.log("_diff--");
+        this.moveSlide ( this.circle((to > _from ? to: _from ) - _diff - 1), this.containerOuterWidth * _direction, 0 );
+      }
+
+      // if (this.options.continuous) {
+      //   if ( this.circle(to) < to && _direction < 0 || this.circle(to) > to && _direction > 0 ) {
+      //     this.moveSlide ( this.circle((to)), this.containerOuterWidth * _direction, 0 );
+      //   }
+      // }
+      // this.moveSlide(this.circle(to + _direction),
+      //                 this.containerOuterWidth * _direction, _speed);
 
       to = this.circle(to);
 
-      this.moveSlide(_from, this.containerOuterWidth * _direction, this.duration) 
-      this.moveSlide(to, this.getTargetPosition(to), this.duration, this.toggleActiveState(to));
+
+
+      this.moveSlide(_from, this.containerOuterWidth * _originalDirection || _direction, _speed);
+      this.moveSlide(to, this.getTargetPosition(to), _speed, this.toggleActiveState(to));
       this.moveArrow(to);
-        
-
-
     },
 
 
@@ -277,11 +316,13 @@
     },
 
     next: function() {
-      if (this.activeSlide < this.slidesElements.length - 1) this.switchSlide(this.activeSlide + 1);
+      if ( this.options.continuous ) { this.switchSlide(this.activeSlide + 1); }
+      else if (this.activeSlide < this.slidesElements.length - 1) { this.switchSlide(this.activeSlide + 1); }
     },
 
     prev: function() {
-      if (this.activeSlide > 0) this.switchSlide(this.activeSlide - 1);
+      if ( this.options.continuous ) { this.switchSlide(this.activeSlide - 1); }
+      else if (this.activeSlide > 0){ this.switchSlide(this.activeSlide - 1); }
     },
 
     stop: function() {
