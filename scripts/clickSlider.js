@@ -109,7 +109,7 @@
 
       this.containerInnerWidth = _slidesContainer.width();
       this.containerOuterWidth = _slidesContainer.outerWidth();
-      this.containerPaddingLeft = _slidesContainer.css('padding-left');
+      this.containerPaddingLeft = parseInt(_slidesContainer.css('padding-left'), 10);
 
       this.containerHeight = this.getMaxHeight();
 
@@ -117,11 +117,12 @@
       _slidesContainer.height(this.containerHeight);
 
 
-      this.setCountClass(this.controlElements, defaults.SLIDER_CONTROLL_CLASS);
       this.setCountClass(this.slidesElements, defaults.SLIDER_SLIDE_CLASS);
 
-
-      this.initControls(this.controlElements);
+      if (this.controlElements) {
+        this.setCountClass(this.controlElements, defaults.SLIDER_CONTROLL_CLASS);
+        this.initControls(this.controlElements);
+      }
 
       this.startPosition(this.options.startSlide);
       //switchSlide( options.startSlide );
@@ -244,10 +245,13 @@
      */
     toggleActiveState: function (slideNumber) {
       this.slidesElements.removeClass('active');
-      this.controlElements.removeClass('active');
-
       $(this.slidesElements[slideNumber]).addClass('active');
-      $(this.controlElements[slideNumber]).addClass('active');
+
+      if(this.controlElements) {
+        this.controlElements.removeClass('active');
+        $(this.controlElements[slideNumber]).addClass('active');
+      }
+
       this.activeSlide = slideNumber;
     },
 
