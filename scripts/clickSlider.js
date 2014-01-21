@@ -1,6 +1,6 @@
 /*global jQuery, window, document*/
 
-(function ($, window, document, undefined) {
+(function($, window, document, undefined) {
   'use strict';
 
   // undefined is used here as the undefined global variable in ECMAScript 3 is
@@ -87,7 +87,7 @@
 
   ClickSlider.prototype = {
 
-    init: function () {
+    init: function() {
       // Place initialization logic here
       // You already have access to the DOM element and
       // the options via the instance, e.g. this.$element
@@ -149,7 +149,7 @@
      * @return {[type]}
      */
 
-    startPosition: function (startSlide) {
+    startPosition: function(startSlide) {
       var _slideNumber = startSlide || 0;
       var _targetPosition;
       var _elementWidth;
@@ -160,7 +160,7 @@
         if (i !== _slideNumber && i > 0) {
           _targetPosition = this.containerOuterWidth;
         } else if (i !== _slideNumber) {
-          _targetPosition = - this.containerOuterWidth;
+          _targetPosition = -this.containerOuterWidth;
         } else {
           _targetPosition = ((this.containerInnerWidth - _elementWidth) / 2) + this.containerPaddingLeft;
           _targetPosition = this.options.fullscreen ? 0 : _targetPosition;
@@ -180,10 +180,10 @@
 
     },
 
-    getTargetPosition: function (slide) {
+    getTargetPosition: function(slide) {
       var _elementWidth = this.slidesData[slide].width;
 
-       return (this.containerInnerWidth - _elementWidth) / 2 + this.containerPaddingLeft ;
+      return (this.containerInnerWidth - _elementWidth) / 2 + this.containerPaddingLeft;
 
     },
 
@@ -191,9 +191,9 @@
      * switches slides
      * @return {[type]}
      */
-    switchSlide: function ( to, speed ) {
+    switchSlide: function(to, speed) {
 
-      if ( this.activeSlide === to ) return;
+      if (this.activeSlide === to) return;
 
       var _from = this.activeSlide;
       var _direction;
@@ -204,26 +204,26 @@
 
       _direction = Math.abs(_from - to) / (_from - to); // 1: backward, -1: forward
 
-       // get the actual position of the slide
+      // get the actual position of the slide
       if (this.options.continuous) {
         _originalDirection = _direction;
-        _direction = - $(this.slidesElements[this.circle(to)]).position().left / this.containerOuterWidth;
+        _direction = -$(this.slidesElements[this.circle(to)]).position().left / this.containerOuterWidth;
 
-        this.moveSlide ( this.circle(to) - _originalDirection, this.containerOuterWidth * - _originalDirection, 0 );
+        this.moveSlide(this.circle(to) - _originalDirection, this.containerOuterWidth * -_originalDirection, 0);
 
         // if going forward but to < index, use to = slides.length + to
         // if going backward but to > index, use to = -slides.length + to
-        if (_direction !== _originalDirection){
+        if (_direction !== _originalDirection) {
 
-         // to =  -_direction * this.slidesElements.length + to;
-          this.moveSlide ( this.circle(to) , this.containerOuterWidth * _direction, 0 );
+          // to =  -_direction * this.slidesElements.length + to;
+          this.moveSlide(this.circle(to), this.containerOuterWidth * _direction, 0);
         }
 
       }
       _diff = Math.abs(_from - to) - 1;
 
       while (_diff--) {
-        this.moveSlide ( this.circle((to > _from ? to: _from ) - _diff - 1), this.containerOuterWidth * _direction, 0 );
+        this.moveSlide(this.circle((to > _from ? to : _from) - _diff - 1), this.containerOuterWidth * _direction, 0);
       }
       to = this.circle(to);
 
@@ -243,7 +243,7 @@
      * @returns {*}
      */
 
-    moveSlide: function (slide, targetPosition, speed, callback) {
+    moveSlide: function(slide, targetPosition, speed, callback) {
       var _slideElement = $(this.slidesElements[slide]);
       var _that = this;
 
@@ -256,29 +256,28 @@
         return;
       }
 
-     return _slideElement.stop().animate({
-              left: targetPosition
-            }, {
-              duration: this.duration,
-              easing: this.easing,
-              complete: function() {
-                if (_that.delay) _that.begin();
-                if (typeof callback === 'function') {
-                  callback(_that);
-                }
-              }
-            }
-            );
+      return _slideElement.stop().animate({
+        left: targetPosition
+      }, {
+        duration: this.duration,
+        easing: this.easing,
+        complete: function() {
+          if (_that.delay) _that.begin();
+          if (typeof callback === 'function') {
+            callback(_that);
+          }
+        }
+      });
     },
 
     /**
      * [setActiveSlide description]
      */
-    toggleActiveState: function (slideNumber) {
+    toggleActiveState: function(slideNumber) {
       this.slidesElements.removeClass('active');
       $(this.slidesElements[slideNumber]).addClass('active');
 
-      if(this.controlElements) {
+      if (this.controlElements) {
         this.controlElements.removeClass('active');
         $(this.controlElements[slideNumber]).addClass('active');
       }
@@ -294,9 +293,9 @@
 
     circle: function(index) {
 
-    // a simple positive modulo using this.slidesElements.length
-     return (this.slidesElements.length +
-                (index % this.slidesElements.length)) % this.slidesElements.length;
+      // a simple positive modulo using this.slidesElements.length
+      return (this.slidesElements.length +
+        (index % this.slidesElements.length)) % this.slidesElements.length;
 
     },
 
@@ -308,13 +307,19 @@
     },
 
     next: function() {
-      if ( this.options.continuous ) { this.switchSlide(this.activeSlide + 1); }
-      else if (this.activeSlide < this.slidesElements.length - 1) { this.switchSlide(this.activeSlide + 1); }
+      if (this.options.continuous) {
+        this.switchSlide(this.activeSlide + 1);
+      } else if (this.activeSlide < this.slidesElements.length - 1) {
+        this.switchSlide(this.activeSlide + 1);
+      }
     },
 
     prev: function() {
-      if ( this.options.continuous ) { this.switchSlide(this.activeSlide - 1); }
-      else if (this.activeSlide > 0){ this.switchSlide(this.activeSlide - 1); }
+      if (this.options.continuous) {
+        this.switchSlide(this.activeSlide - 1);
+      } else if (this.activeSlide > 0) {
+        this.switchSlide(this.activeSlide - 1);
+      }
     },
 
     stop: function() {
@@ -330,21 +335,21 @@
      * @param  {[type]} argument
      * @return {[type]}
      */
-    moveArrow: function ( dest, speed ) {
+    moveArrow: function(dest, speed) {
       if (!this.arrowElement) return;
 
-      var _arrowElement =   $(this.arrowElement),
-          _targetPosition = $(this.controlElements[dest]).parent().position().left,
-          _leftMargin = parseInt($(this.controlElements[dest]).parent().css('marginLeft'), 10),
-          _leftPadding = parseInt($(this.controlElements[dest]).parent().css('paddingLeft'), 10),
-          _controlWidth = $(this.controlElements[dest]).width(),
-          _arrowWidth = $(this.arrowElement).width(),
-          _centerPosition;
+      var _arrowElement = $(this.arrowElement),
+        _targetPosition = $(this.controlElements[dest]).parent().position().left,
+        _leftMargin = parseInt($(this.controlElements[dest]).parent().css('marginLeft'), 10),
+        _leftPadding = parseInt($(this.controlElements[dest]).parent().css('paddingLeft'), 10),
+        _controlWidth = $(this.controlElements[dest]).width(),
+        _arrowWidth = $(this.arrowElement).width(),
+        _centerPosition;
 
-        _centerPosition = _controlWidth > _arrowWidth ?
-          ( _controlWidth - _arrowWidth ) / 2 :  ( _arrowWidth - _controlWidth ) / 2;
+      _centerPosition = _controlWidth > _arrowWidth ?
+        (_controlWidth - _arrowWidth) / 2 : (_arrowWidth - _controlWidth) / 2;
 
-        _centerPosition = _leftMargin === 0 ? 0 : _centerPosition;
+      _centerPosition = _leftMargin === 0 ? 0 : _centerPosition;
 
       if (speed === 0) {
         _arrowElement.css({
@@ -356,13 +361,13 @@
 
       _arrowElement.stop().animate({
         marginLeft: _targetPosition + _centerPosition + _leftPadding
-      },{
+      }, {
         duration: speed || this.duration,
         easing: this.easing
       });
     },
 
-    getElements: function (parent, searchedElement) {
+    getElements: function(parent, searchedElement) {
       var element = $(parent).find(searchedElement);
 
       return element.length > 0 ? element : null;
@@ -370,13 +375,13 @@
 
 
 
-    setCountClass: function (element, className) {
+    setCountClass: function(element, className) {
       for (var i = 0; i < element.length; i++) {
         $(element[i]).addClass(defaults.SLIDER_CLASS + className + i);
       }
     },
 
-    collectSlideData: function (elements) {
+    collectSlideData: function(elements) {
       var data = {};
 
       for (var i = 0; i < elements.length; i++) {
@@ -393,7 +398,7 @@
      * @returns {{width: *, height: *, direction: type[]}}
      */
 
-    getSlideData: function (slide) {
+    getSlideData: function(slide) {
       var _el = $(slide);
 
       return {
@@ -402,33 +407,33 @@
       };
     },
 
-    initControls: function (elements) {
+    initControls: function(elements) {
       for (var i = 0; i < elements.length; i++) {
         this.addClickEvent(elements[i]);
       }
     },
 
-    getMaxHeight: function () {
+    getMaxHeight: function() {
       var _slideDataArr = $.makeArray(this.slidesData);
 
-      var maxHeight = $.map(_slideDataArr[0], function (index, el) {
+      var maxHeight = $.map(_slideDataArr[0], function(index, el) {
         return index.height;
       });
 
       return Math.max.apply(null, maxHeight);
     },
 
-    addClickEvent: function (element) {
+    addClickEvent: function(element) {
       var _className = $(element).attr('class');
       var _position = parseInt(_className.substr(_className.lastIndexOf('__') + 2, _className.length - 1), 10);
 
-      $(element).on('click', $.proxy(function ( event ) {
+      $(element).on('click', $.proxy(function(event) {
         this.switchSlide(_position);
       }, this));
     },
 
     addResizeEvent: function() {
-      $(window).on('resize', $.proxy(function(){
+      $(window).on('resize', $.proxy(function() {
         var _slidesContainer = this.getElements(this.$element, '.slider-slides');
 
         this.containerInnerWidth = _slidesContainer.width();
@@ -443,8 +448,8 @@
 
   // A really lightweight plugin wrapper around the constructor,
   // preventing against multiple instantiations
-  $.fn[pluginName] = function (options) {
-    return this.each(function () {
+  $.fn[pluginName] = function(options) {
+    return this.each(function() {
       if (!$.data(this, 'plugin-' + pluginName)) {
         $.data(this, 'plugin-' + pluginName, new ClickSlider(this, options));
       }
