@@ -21,7 +21,9 @@
       SLIDER_SLIDE_CLASS: 'slide__',
 
       DEFAULT_EASING: 'linear',
-      DEFAULT_DURATION: 1000
+      DEFAULT_DURATION: 1000,
+
+      fullscreen: false
 
     };
 
@@ -134,7 +136,7 @@
       }
 
       this.startPosition(this.options.startSlide);
-      //switchSlide( options.startSlide );
+      this.addResizeEvent();
 
 
     },
@@ -161,7 +163,10 @@
           _targetPosition = - this.containerOuterWidth;
         } else {
           _targetPosition = ((this.containerInnerWidth - _elementWidth) / 2) + this.containerPaddingLeft;
+          _targetPosition = this.options.fullscreen ? 0 : _targetPosition;
+
         }
+
 
         $(this.slidesElements[i]).css({
           'position': 'absolute',
@@ -190,14 +195,13 @@
 
       if ( this.activeSlide === to ) return;
 
-
       var _from = this.activeSlide;
       var _direction;
       var _diff;
       var _originalDirection;
+      var _targetPosition;
       var _speed = speed || this.duration;
 
- console.log("to before", to);
       _direction = Math.abs(_from - to) / (_from - to); // 1: backward, -1: forward
 
        // get the actual position of the slide
@@ -205,40 +209,28 @@
         _originalDirection = _direction;
         _direction = - $(this.slidesElements[this.circle(to)]).position().left / this.containerOuterWidth;
 
-
+        this.moveSlide ( this.circle(to) - _originalDirection, this.containerOuterWidth * - _originalDirection, 0 );
 
         // if going forward but to < index, use to = slides.length + to
         // if going backward but to > index, use to = -slides.length + to
         if (_direction !== _originalDirection){
-         // this.moveSlide ( to + _direction, this.containerOuterWidth * _direction, 0 );
-          to =  -_direction * this.slidesElements.length + to;
-          console.log("_direction !== _originalDirection");
-          //this.moveSlide ( to, this.containerOuterWidth * _direction, 0 );
+
+         // to =  -_direction * this.slidesElements.length + to;
+          this.moveSlide ( this.circle(to) , this.containerOuterWidth * _direction, 0 );
         }
 
       }
-   console.log("to after", to);
       _diff = Math.abs(_from - to) - 1;
 
       while (_diff--) {
-         console.log("_diff--");
         this.moveSlide ( this.circle((to > _from ? to: _from ) - _diff - 1), this.containerOuterWidth * _direction, 0 );
       }
-
-      // if (this.options.continuous) {
-      //   if ( this.circle(to) < to && _direction < 0 || this.circle(to) > to && _direction > 0 ) {
-      //     this.moveSlide ( this.circle((to)), this.containerOuterWidth * _direction, 0 );
-      //   }
-      // }
-      // this.moveSlide(this.circle(to + _direction),
-      //                 this.containerOuterWidth * _direction, _speed);
-
       to = this.circle(to);
 
+      _targetPosition = this.options.fullscreen ? 0 : this.getTargetPosition(to);
 
-
-      this.moveSlide(_from, this.containerOuterWidth * _originalDirection || _direction, _speed);
-      this.moveSlide(to, this.getTargetPosition(to), _speed, this.toggleActiveState(to));
+      this.moveSlide(_from, this.containerOuterWidth * (_originalDirection || _direction), _speed);
+      this.moveSlide(to, _targetPosition, _speed, this.toggleActiveState(to));
       this.moveArrow(to);
     },
 
@@ -264,7 +256,7 @@
         return;
       }
 
-     return _slideElement.animate({
+     return _slideElement.stop().animate({
               left: targetPosition
             }, {
               duration: this.duration,
@@ -343,6 +335,8 @@
 
       var _arrowElement =   $(this.arrowElement),
           _targetPosition = $(this.controlElements[dest]).parent().position().left,
+          _leftMargin = parseInt($(this.controlElements[dest]).parent().css('marginLeft'), 10),
+          _leftPadding = parseInt($(this.controlElements[dest]).parent().css('paddingLeft'), 10),
           _controlWidth = $(this.controlElements[dest]).width(),
           _arrowWidth = $(this.arrowElement).width(),
           _centerPosition;
@@ -350,17 +344,18 @@
         _centerPosition = _controlWidth > _arrowWidth ?
           ( _controlWidth - _arrowWidth ) / 2 :  ( _arrowWidth - _controlWidth ) / 2;
 
+        _centerPosition = _leftMargin === 0 ? 0 : _centerPosition;
+
       if (speed === 0) {
         _arrowElement.css({
-          marginLeft: _targetPosition + _centerPosition
+          marginLeft: _targetPosition + _centerPosition + _leftPadding
         });
-
 
         return;
       }
 
-      _arrowElement.animate({
-        marginLeft: _targetPosition + _centerPosition
+      _arrowElement.stop().animate({
+        marginLeft: _targetPosition + _centerPosition + _leftPadding
       },{
         duration: speed || this.duration,
         easing: this.easing
@@ -413,6 +408,16 @@
       }
     },
 
+    getMaxHeight: function () {
+      var _slideDataArr = $.makeArray(this.slidesData);
+
+      var maxHeight = $.map(_slideDataArr[0], function (index, el) {
+        return index.height;
+      });
+
+      return Math.max.apply(null, maxHeight);
+    },
+
     addClickEvent: function (element) {
       var _className = $(element).attr('class');
       var _position = parseInt(_className.substr(_className.lastIndexOf('__') + 2, _className.length - 1), 10);
@@ -422,15 +427,16 @@
       }, this));
     },
 
-    getMaxHeight: function () {
-      var _slideDataArr = $.makeArray(this.slidesData);
+    addResizeEvent: function() {
+      $(window).on('resize', $.proxy(function(){
+        var _slidesContainer = this.getElements(this.$element, '.slider-slides');
 
-      var maxHeight = $.map(_slideDataArr[0], function (index, el) {
-        return index.height;
-      });
-
-      return Math.max.apply(null, maxHeight);
+        this.containerInnerWidth = _slidesContainer.width();
+        this.containerOuterWidth = _slidesContainer.outerWidth();
+        this.startPosition(this.activeSlide);
+      }, this));
     }
+
 
 
   };
